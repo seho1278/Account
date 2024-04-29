@@ -13,8 +13,7 @@ import org.springframework.stereotype.Service;
 import jakarta.transaction.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import static com.example.accountproject.type.AccountStatus.IN_USE;
@@ -40,9 +39,17 @@ public class AccountService {
 
         validateCreateAccount(accountUser);
 
+        Random random = new Random();
+
         String newAccountNumber = accountRepository.findFirstByOrderByIdDesc()
-                .map(account -> (Integer.parseInt(account.getAccountNumber())) + 1 + "")
-                .orElse("1000000000");
+                .map(account -> {
+                    Long randomNumber = 1 + random.nextLong(9999999998L);
+                    return String.format("%010d", randomNumber);
+                })
+                .orElseGet(() -> {
+                    Long randomNumber = 1 + random.nextLong(9999999998L);
+                    return String.format("%010d", randomNumber); // 10자리로 포맷팅
+                });
 
         // 일회성 변수는 가급적 사용하지 않는 것이 좋음
         return AccountDto.fromEntity(
